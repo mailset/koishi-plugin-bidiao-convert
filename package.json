@@ -4,6 +4,11 @@
   "version": "1.1.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "homepage": "https://github.com/mailset/koishi-plugin-bidiao-convert",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mailset/koishi-plugin-bidiao-convert.git"
+  },
   "files": [
     "lib",
     "dist"
