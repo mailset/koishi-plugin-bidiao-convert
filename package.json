@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-bidiao-convert",
-  "description": "",
-  "version": "0.0.1",
+  "description": "逼吊公母安卓苹果自动转换。灵感来源于布丁Bot",
+  "version": "1.1.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -9,13 +9,12 @@
     "dist"
   ],
   "license": "MIT",
-  "scripts": {},
   "keywords": [
+    "convert",
     "chatbot",
     "koishi",
     "plugin"
   ],
-  "devDependencies": {},
   "peerDependencies": {
     "koishi": "^4.18.7"
   }
