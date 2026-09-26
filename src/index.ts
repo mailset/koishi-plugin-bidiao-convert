@@ -69,24 +69,13 @@ export function apply(ctx: Context, config: Config) {
       return
     }
 
-    // 短消息：每个词单独替换，发多条变体
+    // 未超过：每个词替换一次，发多条
     const outputs: string[] = []
     for (const [a, b] of pairs) {
-      const hasA = content.includes(a)
-      const hasB = content.includes(b)
-
-      if (hasA) {
-        const r = content.split(a).join(b)
-        if (r !== content && !outputs.includes(r)) outputs.push(r)
-      }
-      if (hasB) {
-        const r = content.split(b).join(a)
-        if (r !== content && !outputs.includes(r)) outputs.push(r)
-      }
-      if (hasA && hasB) {
-        const re = new RegExp(`${escapeRegExp(a)}|${escapeRegExp(b)}`, 'g')
-        const r: string = content.replace(re, (m) => (m === a ? b : a))
-        if (r !== content && !outputs.includes(r)) outputs.push(r)
+      for (const [from, to] of [[a, b], [b, a]]) {
+        if (!content.includes(from)) continue
+        const result = content.split(from).join(to)
+        if (result !== content && !outputs.includes(result)) outputs.push(result)
       }
     }
 
