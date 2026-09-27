@@ -7,6 +7,7 @@ export interface Config {
   ignore: string[]
   delay: number
   maxLength: number
+  onceLength: number
   rate: number
 }
 
@@ -28,6 +29,9 @@ export const Config: Schema<Config> = Schema.object({
     .description('多条消息之间的间隔（毫秒）。')
     .default(30),
   maxLength: Schema.number()
+    .description('消息长度超过该值时，不回复。')
+    .default(200),
+  onceLength: Schema.number()
     .description('消息长度超过该值时，只发一条把全部关键词替换后的消息。')
     .default(30),
   rate: Schema.number()
@@ -59,11 +63,14 @@ export function apply(ctx: Context, config: Config) {
     const chance = (rate: number): boolean => Math.random() < rate;
     if (!chance(config.rate)) return
 
+    // 消息过长，跳过
+    if (config.maxLength && content.length > config.maxLength) return;
+
     // 命中屏蔽关键词，整条跳过
     if (ignore.some((word) => content.includes(word))) return
 
     // 长消息：所有关键词一次性交换，只复读一条
-    if (config.maxLength && content.length > config.maxLength) {
+    if (config.onceLength && content.length > config.onceLength) {
       const words = pairs.flatMap(([a, b]) => [a, b])
       const re = new RegExp(words.map(escapeRegExp).join('|'), 'g')
       const result = content.replace(re, (m) => {
