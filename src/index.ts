@@ -7,6 +7,7 @@ export interface Config {
   ignore: string[]
   delay: number
   maxLength: number
+  rate: number
 }
 
 export const Config: Schema<Config> = Schema.object({
@@ -23,12 +24,15 @@ export const Config: Schema<Config> = Schema.object({
     .role('table')
     .description('消息中包含任意一个关键词时，不再复读。')
     .default(['祖国']),
-  delay: Schema.natural()
+  delay: Schema.number()
     .description('多条消息之间的间隔（毫秒）。')
     .default(30),
-  maxLength: Schema.natural()
+  maxLength: Schema.number()
     .description('消息长度超过该值时，只发一条把全部关键词替换后的消息。')
     .default(30),
+  rate: Schema.number()
+    .description('概率匹配：回复概率')
+    .default(0.5),
 })
 
 function escapeRegExp(s: string) {
@@ -50,6 +54,10 @@ export function apply(ctx: Context, config: Config) {
 
     const content = session.content
     if (!content) return
+
+    // 概率匹配，匹配所有信息，即使没有击中关键词。但最终效果的概率是一样的
+    const chance = (rate: number): boolean => Math.random() < rate;
+    if (!chance(config.rate)) return
 
     // 命中屏蔽关键词，整条跳过
     if (ignore.some((word) => content.includes(word))) return
