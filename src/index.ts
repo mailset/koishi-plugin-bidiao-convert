@@ -1,6 +1,6 @@
 import { Context, Schema } from 'koishi'
 
-export const name = 'swap-word'
+export const name = 'bidiao-convert'
 
 export interface Config {
   pairs: string[][]
@@ -9,6 +9,8 @@ export interface Config {
   maxLength: number
   onceLength: number
   rate: number
+  enableModel: boolean
+  modelK: number
 }
 
 export const Config: Schema<Config> = Schema.object({
@@ -37,6 +39,12 @@ export const Config: Schema<Config> = Schema.object({
   rate: Schema.number()
     .description('概率匹配：回复概率')
     .default(0.5),
+  enableModel: Schema.boolean()
+    .description('启用y=e^(-kx)模型来处理回复概率与字数的关系')
+    .default(false),
+  modelK: Schema.number()
+    .description('上文中的k值')
+    .default(0.007)
 })
 
 function escapeRegExp(s: string) {
@@ -59,9 +67,15 @@ export function apply(ctx: Context, config: Config) {
     const content = session.content
     if (!content) return
 
+
     // 概率匹配，匹配所有信息，即使没有击中关键词。但最终效果的概率是一样的
     const chance = (rate: number): boolean => Math.random() < rate;
-    if (!chance(config.rate)) return
+    if (config.enableModel) {
+      if (!chance(Math.exp(-config.modelK * content.length))) return;
+    } else {
+      if (!chance(config.rate)) return
+    }
+
 
     // 消息过长，跳过
     if (config.maxLength && content.length > config.maxLength) return;
